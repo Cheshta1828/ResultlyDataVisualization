@@ -18,26 +18,41 @@ if "selected_subject2" not in st.session_state:
     st.session_state.selected_subject2 = []
 if "checked_items" not in st.session_state:
     st.session_state.checked_items = []
+if "list_of_files" not in st.session_state:
+    st.session_state.list_of_files = []
 print("hello")
 url = 'https://resultlymsi.pythonanywhere.com/visualize/result/'
 response = requests.get(url)
+checkboxes_dict = {}
+
 with col1:
-    options=[f"Course : {(requests.get('https://resultlymsi.pythonanywhere.com/visualize/getcourse/7').json())['abbreviation']} , Semester: {item['semester']}, Passout Year: {item['passout_year']}" for item in response.json()]
+    options=[f"{item['course_abbreviation']} - {item['semester']}, Passout Year: {item['passout_year']}" for item in response.json()]
+    #options=["hello","world","this","is","a","test","to","check","the","functionality","of","the","app"]
     st.header("Fetch data")
     option = st.selectbox("Selected an already available result:", options)
+    # selected_id = response.json()[options.index(option)]['id']
     col1a , col2a  = st.columns(2)
     with col1a:
         res=st.text_input(value= option,label="You Selected",key=None)
+        
         add_button_clicked=st.button("Add", type="primary")
         for item in st.session_state.selected:
-                st.checkbox(item)
+                
+                checkboxes_dict[item] = st.checkbox(item)
         if add_button_clicked:
+            #append the selected file 's id in the list of files column by converting it to csv
+            selected_id = response.json()[options.index(option)]['id']
             st.session_state.selected.append(res)
+            st.session_state.list_of_files .append(selected_id) 
+            print("list of files",st.session_state.list_of_files )
+            
             for item in st.session_state.selected:
                 try:
-                    st.checkbox(item)
+                    checkboxes_dict[item] =st.checkbox(item)
+                    
                 except:
                     continue
+        #print(checkboxes_dict)
         
     with col2a:
         st.write("")
@@ -49,20 +64,46 @@ with col3:
     uploaded_file=st.file_uploader("Upload custom result to visualize", label_visibility="visible",type=["csv"])
     upload_button_clicked=st.button("Upload", type="primary")
     for item in st.session_state.uploaded:
-                st.checkbox(item)
+                checkboxes_dict[item] = st.checkbox(item)
                 
     if upload_button_clicked:
             if uploaded_file is not None:
                 st.session_state.uploaded.append(uploaded_file.name)
                 for item in st.session_state.uploaded:
                     try:
-                        st.checkbox(item)
+                        checkboxes_dict[item] = st.checkbox(item)
+                        
                     except:
                         continue
                     
             else:
                 st.write("No file uploaded!Please choose one")
                 
+style = "<style>.row-widget.stButton {text-align: center;}</style>"
+st.markdown(style, unsafe_allow_html=True)
+with st.empty():
+    if st.button("Fetch Subjects"):
+        #print("--------checkboxdict",checkboxes_dict)
+        for item in  checkboxes_dict:
+                # st.session_state.checked_items.append(item)
+                if len([s for s in checkboxes_dict.keys() if checkboxes_dict[s]])>2:
+                    lstst=[s for s in checkboxes_dict.keys() if checkboxes_dict[s]]
+                    print("lstst",lstst)
+                    #print([s for s in checkboxes_dict.keys()])
+                    #pop up the error message and do not move forward with the code
+                    st.error("You can only select 2 subjects at a time")
+                    # st.session_state.checked_items.pop(0)
+                    checkboxes_dict[item]=False
+                    #uncheck the checkbox
+                    # print("checked_items",st.session_state.checked_items)
+                    #print("checkboxes dicicicicicic",checkboxes_dict)
+                
+                    
+                    
+                    
+                 
+                    
+                                 
 col1b , col2b = st.columns(2)
 with col1b:
     list_updated=0
