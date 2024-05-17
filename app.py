@@ -234,13 +234,13 @@ if st.button("Compare Now!"):
             for subj1 in st.session_state.all_subjects1:
                 
                 #fetch index of subj1
-                index=st.session_state.list_of_files[1].columns.get_loc(subj1)
+                index=st.session_state.list_of_files[0].columns.get_loc(subj1)
                 
-                dfofone[subj1]=list(st.session_state.list_of_files[1].iloc[:,index+2][1:])
+                dfofone[subj1]=list(st.session_state.list_of_files[0].iloc[:,index+2][1:])
 
             for subj2 in st.session_state.all_subjects2:
-                index2=st.session_state.list_of_files[0].columns.get_loc(subj2)
-                dfoftwo[subj2]=list(st.session_state.list_of_files[0].iloc[:,index2+2][1:])
+                index2=st.session_state.list_of_files[1].columns.get_loc(subj2)
+                dfoftwo[subj2]=list(st.session_state.list_of_files[1].iloc[:,index2+2][1:])
 
            
             dfofone=pd.DataFrame(dfofone)
