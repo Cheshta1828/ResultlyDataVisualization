@@ -307,8 +307,7 @@ if st.button("Compare Now!"):
         #-------------------------Stacked grouped bar chart starts here
 
 
-        # Create dummy data indexed by state and with multi-columns [product, revenue]
-        # index = ["California", "Texas", "Arizona", "Nevada", "Louisiana"]
+        
         selected_subjects1 = st.session_state.all_subjects1
         selected_subjects2 = st.session_state.all_subjects2
         index = [f"{selected_subjects1[i]} and {selected_subjects2[i]}" for i in range(len(selected_subjects1))]
