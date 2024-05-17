@@ -7,10 +7,7 @@ import plotly.figure_factory as ff
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
-#import scipy
 import scipy
-
-
 st.set_page_config(page_title=None, page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items=None)
 st.markdown("<h1 style='text-align: center; color: white;'>Data Visualization</h1>", unsafe_allow_html=True)
 col1 , col2 , col3 = st.columns(3)
@@ -40,40 +37,28 @@ if "all_subjects2" not in st.session_state:
     st.session_state.all_subjects2 = []
 if "buttondisabled" not in st.session_state:
     st.session_state.buttondisabled = False
-    
 url = 'https://resultlymsi.pythonanywhere.com/visualize/result/'
 response = requests.get(url)
 checkboxes_dict = {}
-
 with col1:
     options=[f"{item['course_abbreviation']} - {item['semester']} Passout Year: {item['passout_year']} ({item['id']})" for item in response.json()]
-    #options=["hello","world","this","is","a","test","to","check","the","functionality","of","the","app"]
     st.header("Fetch data")
     option = st.selectbox("Selected an already available result:", options)
-    # selected_id = response.json()[options.index(option)]['id']
     col1a , col2a  = st.columns(2)
     with col1a:
         res=st.text_input(value= option,label="You Selected",key=None)
-        
         add_button_clicked=st.button("Add", type="primary")
         for item in st.session_state.selected:
-                
-                checkboxes_dict[item] = st.checkbox(item)
+            checkboxes_dict[item] = st.checkbox(item)
         if add_button_clicked:
-            #append the selected file 's id in the list of files column by converting it to csv
             selected_id = response.json()[options.index(option)]['id']
             st.session_state.selected.append(res)
-           
-            
-            
             for item in st.session_state.selected:
                 try:
                     checkboxes_dict[item] =st.checkbox(item)
                     
                 except:
                     continue
-    
-        
     with col2a:
         st.write("")
         
@@ -85,65 +70,39 @@ with col3:
     upload_button_clicked=st.button("Upload", type="primary")
     for item in st.session_state.uploaded:
                 checkboxes_dict[item] = st.checkbox(item)
-                
     if upload_button_clicked:
             if uploaded_file is not None:
                 st.session_state.uploaded[uploaded_file.name] = uploaded_file
                 for item in st.session_state.uploaded:
                     try:
                         checkboxes_dict[item] = st.checkbox(item)
-                        
                     except:
                         continue
-                    
             else:
                 st.write("No file uploaded!Please choose one")
-                
 style = "<style>.row-widget.stButton {text-align: center;}</style>"
 st.markdown(style, unsafe_allow_html=True)
 error=False
 with st.empty():
     btn=st.button("Fetch Subjects")
     if btn and not st.session_state.buttondisabled:
-       
-        
         st.session_state.buttondisabled=True
-        
-        
-        
-        
-      
         error=False
         for item in  checkboxes_dict:
-                # st.session_state.checked_items.append(item)
                 if len([s for s in checkboxes_dict.keys() if checkboxes_dict[s]])>2:
                     lstst=[s for s in checkboxes_dict.keys() if checkboxes_dict[s]]
-                    print("lstst",lstst)
-                    #print([s for s in checkboxes_dict.keys()])
-                    #pop up the error message and do not move forward with the code
                     st.error("You can only select 2 subjects at a time")
                     error=True
-                    # st.session_state.checked_items.pop(0)
                     checkboxes_dict[item]=False
         if not error:
-            
             for item in checkboxes_dict.keys():
                 if ".csv" in item:
-                    print("in")
-                    print("---item---",item)
                     df=pd.read_csv(st.session_state.uploaded[item])
-                    print("--df of uoloaded--",df)
-                    print("inss")
                     st.session_state.list_of_files.append(df)
-                    
-                else: #fetched data
-                    print("in fetched")
+                else:
                     listofstring=item.split(" ")
-                    print("--listofstring----",listofstring)
                     id=listofstring[-1][1:-1]
-                    print("--id---",id)
                     item = requests.get(f'https://resultlymsi.pythonanywhere.com/visualize/result/{id}').json()
-                    print("item",item)
                     df_file=pd.read_json(item['result_json'])
                     st.session_state.list_of_files.append(df_file)
               
@@ -153,20 +112,13 @@ with st.empty():
             st.session_state.columnsofuploaded = st.session_state.columnsofuploaded [:-4]
             st.session_state.columnsoffetched=[c for c  in st.session_state.columnsoffetched if 'External' not in c and 'Internal' not in c and 'Total' not in c]
             st.session_state.columnsofuploaded =[c for c in  st.session_state.columnsofuploaded  if 'External' not in c and 'Internal' not in c and 'Total' not in c and '.1' not in c and '.2' not in c]
-                   
-                    
-                    
     elif st.session_state.buttondisabled and btn:
         st.error("Please Refresh")             
                  
-                    
-                                 
 col1b , col2b = st.columns(2)
 with col1b:
     list_updated=0
     st.markdown("<h4 style=' color: white;'>Fetched Data </h4>", unsafe_allow_html=True)
-    
-     
     option1 = st.selectbox(
     "Select the subject(s) :",st.session_state.columnsoffetched)
     add_button2_clicked=st.button("Add Data 1 Subject", type="primary")
@@ -178,30 +130,19 @@ with col1b:
             list_duplicate = st.session_state.selected_subject
             st.session_state.selected_subject.append(option1)
             list_updated=1
-           
             st.session_state.s=""
             for item in st.session_state.selected_subject:
-                
-            
                 st.session_state.s=st.session_state.s+"\n"+str(item)
-                
-            
             list_updated=0
-            
             placeholder.text(st.session_state.s)
-        
-            
 with col2b:
     st.markdown("<h4 style=' color: white;'>Uploaded Data</h4>", unsafe_allow_html=True)
-    
     option2 = st.selectbox(
-    "Selected the subject(s):", st.session_state.columnsofuploaded 
-    )
+    "Selected the subject(s):", st.session_state.columnsofuploaded)
     list_updated=0
     add_button3_clicked=st.button("Add Data 2 subject", type="primary")
     if add_button3_clicked:
         st.session_state.all_subjects2.append(option2) 
-        
     placeholder2=st.empty()
     placeholder2.write(st.session_state.str2)
     if add_button3_clicked:
@@ -211,106 +152,58 @@ with col2b:
             list_updated=1
             st.session_state.str2=""
             for item in st.session_state.selected_subject2:
-                
-            
                 st.session_state.str2=st.session_state.str2+"\n"+str(item)
-                
-            
             list_updated=0
-            
             placeholder2.text(st.session_state.str2)
-            
-                       
 reappeardict1={}
 reappeardict2={}
 style = "<style>.row-widget.stButton {text-align: center;}</style>"
 st.markdown(style, unsafe_allow_html=True)
-
 if st.button("Compare Now!"):
+        Lofdf=[]
         if len(st.session_state.all_subjects1)!= len(st.session_state.all_subjects2):
             st.error("Please select 2 subjects to compare")
         else:
-            
-            #st.markdown("<h2 style=' color: white;'>Comparison of the total marks of all the subjects</h2>", unsafe_allow_html=True)
-
             dfofone={}
             dfoftwo={}
-        
             for subj1 in st.session_state.all_subjects1:
-                
-                #fetch index of subj1
                 index=st.session_state.list_of_files[0].columns.get_loc(subj1)
-                
                 dfofone[subj1]=list(st.session_state.list_of_files[0].iloc[:,index+2][1:])
-
             for subj2 in st.session_state.all_subjects2:
                 index2=st.session_state.list_of_files[1].columns.get_loc(subj2)
                 dfoftwo[subj2]=list(st.session_state.list_of_files[1].iloc[:,index2+2][1:])
-
-           
             dfofone=pd.DataFrame(dfofone)
             dfoftwo=pd.DataFrame(dfoftwo)
-            #plotting each subject against the other 
             no_of_graphs=dfofone.shape[1]
-           
             for i in range(no_of_graphs):
                 subj1 = dfofone.columns[i]
                 subj2 = dfoftwo.columns[i]
                 reappeardict1[subj1]=0
                 reappeardict2[subj2]=0
-                print("subj1", subj1)
-                print("subj2", subj2)
                 y1 = pd.to_numeric(dfofone.iloc[:, i],errors="coerce").sort_values(ascending=True).reset_index(drop=True)
                 y2 = pd.to_numeric(dfoftwo.iloc[:, i],errors="coerce").sort_values(ascending=True).reset_index(drop=True)
-                
-                
-                           
-                print("y1", y1)
-                print("y2", y2)
                 x = list(range(1, max(len(y1), len(y2)) + 1))
-                print("x", x)
-
-                # Adjusting the length of y1 and y2 to match x
                 y1 = y1.reindex(range(len(x)))
                 y2 = y2.reindex(range(len(x)))
                 df=pd.DataFrame({"students":x,subj1:y1,subj2:y2})
-                copy_of_df=df.copy()   
-                #iterate over df and update the reappeae subj
+                Lofdf.append(df)
                 for index, row in df.iterrows():
-                    
                     if row[subj1]<40 and row[subj2]>=40:
                         reappeardict1[subj1]+=1
                     if row[subj1]>=0 and row[subj2]<40:
                         reappeardict2[subj2]+=1
-                print("df",df)
                 df_melted=pd.melt(df,id_vars="students",value_vars=[subj1,subj2],var_name="subjects",value_name="marks")
-                print("df_melted",df_melted)
                 fig=px.line(df_melted,x="students",y="marks",color="subjects",title=f"Comparison of {dfofone.columns[i]} and {dfoftwo.columns[i]}")
-                
-    
-            
                 with st.container():
                     st.plotly_chart(fig,title=f"Comparison of {dfofone.columns[i]} and {dfoftwo.columns[i]}")
-                    print("plotted")
-
         st.markdown("<h5 style=' color: white;'>Number of reapper in all subjects</h2>", unsafe_allow_html=True)      
         col1d , col2d = st.columns(2)
-        print("reappeardict1",reappeardict1)
-        print("reappeardict2",reappeardict2)
-
         with col1d:
             for key in reappeardict1.keys():
                 st.metric(label=f"{key} Reappear", value=reappeardict1[key])
         with col2d:
             for key in reappeardict2.keys():
                 st.metric(label=f"{key} Reappear", value=reappeardict2[key])
-
-                    
-                    
-                    
-        #-------------------------Stacked grouped bar chart starts here
-
-        #st.markdown("<h2 style=' color: white;'>Internal - External marks comparision of all the subjects</h2>", unsafe_allow_html=True) 
         selected_subjects1 = st.session_state.all_subjects1
         selected_subjects2 = st.session_state.all_subjects2
         selected_subeject = selected_subjects1 + selected_subjects2
@@ -324,121 +217,99 @@ if st.button("Compare Now!"):
             d2 = st.session_state.list_of_files[0]
         indexs1 = [d1.columns.get_loc(subj) for subj in selected_subjects1]
         indexs2 = [d2.columns.get_loc(subj) for subj in selected_subjects2]
-        #get mean of indexes 
         for index in indexs1:
             values1.append(d1.iloc[1:,index].astype(float).mean())
             values1.append(d2.iloc[1:,index].astype(float).mean())
         for index in indexs2:
             values2.append(d1.iloc[1:,index+1].astype(float).mean())
             values2.append(d2.iloc[1:,index+1].astype(float).mean())
-        # Create the figure
         fig = go.Figure()
-
-        # Add the first set of bars
         fig.add_trace(go.Bar(
             x=selected_subeject,
             y=values1,
-            name='Internal'
-        ))
-
-        # Add the second set of bars on top of the first
+            name='Internal'))
         fig.add_trace(go.Bar(
             x=selected_subeject,
             y=values2,
             name='External'
         )) 
         fig.update_layout(barmode='stack', title='Internal - External marks comparison of all the subjects')
-        st.plotly_chart(fig)                
-                   
-                    
-                    
-
-
-
-        print("starting histo")
-        graddict1={
-                    'O':{},
-                    'A':{},
-                    'B':{},
-                    'C':{},
-                    'D':{},
-                    'F':{}}
-        graddict2={
-                    'O':{},
-                    'A':{},
-                    'B':{},
-                    'C':{},
-                    'D':{},
-                    'F':{}}
-        graddict1['O'][subj1]=0
-        graddict1['A'][subj1]=0
-        graddict1['B'][subj1]=0
-        graddict1['C'][subj1]=0
-        graddict1['D'][subj1]=0
-        graddict1['F'][subj1]=0
-        graddict2['O'][subj2]=0
-        graddict2['A'][subj2]=0
-        graddict2['B'][subj2]=0
-        graddict2['C'][subj2]=0
-        graddict2['D'][subj2]=0
-        graddict2['F'][subj2]=0
+        st.plotly_chart(fig)       
         
-        
-        print("anbdr wala df",copy_of_df)
-        for index, row in copy_of_df.iterrows():
+        for i in range(no_of_graphs):
+            subj1=Lofdf[i].columns[1]
+            subj2=Lofdf[i].columns[2]
+            graddict1={
+                        'O':{},
+                        'A':{},
+                        'B':{},
+                        'C':{},
+                        'D':{},
+                        'F':{}}
+            graddict2={
+                        'O':{},
+                        'A':{},
+                        'B':{},
+                        'C':{},
+                        'D':{},
+                        'F':{}}
+            graddict1['O'][subj1]=0
+            graddict1['A'][subj1]=0
+            graddict1['B'][subj1]=0
+            graddict1['C'][subj1]=0
+            graddict1['D'][subj1]=0
+            graddict1['F'][subj1]=0
+            graddict2['O'][subj2]=0
+            graddict2['A'][subj2]=0
+            graddict2['B'][subj2]=0
+            graddict2['C'][subj2]=0
+            graddict2['D'][subj2]=0
+            graddict2['F'][subj2]=0
+            for index, row in Lofdf[i].iterrows():
+                if row[subj1]>=90:
+                    graddict1['O'][subj1]+=1
+                elif row[subj1]>=75 and row[subj1]<90:
+                    graddict1['A'][subj1]+=1
+                elif row[subj1]>=60 and row[subj1]<75:
+                    graddict1['B'][subj1]+=1
+                elif row[subj1]>=50 and row[subj1]<60:
+                    graddict1['C'][subj1]+=1
+                elif row[subj1]>=40 and row[subj1]<50:
+                    graddict1['D'][subj1]+=1
+                else:
+                    graddict1['F'][subj1]+=1
+                if row[subj2]>=90:
+                    graddict2['O'][subj2]+=1
+                elif row[subj2]>=75 and row[subj2]<90:
+                    graddict2['A'][subj2]+=1
+                elif row[subj2]>=60 and row[subj2]<75:
+                    graddict2['B'][subj2]+=1
+                elif row[subj2]>=50 and row[subj2]<60:
+                    graddict2['C'][subj2]+=1
+                elif row[subj2]>=40 and row[subj2]<50:
+                    graddict2['D'][subj2]+=1
+                else:
+                    graddict2['F'][subj2]+=1
+            grades_df = pd.DataFrame({
+        'Grade': ['O', 'A', 'B', 'C', 'D', 'F'],
+        subj1: [graddict1[grade][subj1] for grade in ['O', 'A', 'B', 'C', 'D', 'F']],
+        subj2: [graddict2[grade][subj2] for grade in ['O', 'A', 'B', 'C', 'D', 'F']]})
+            fig = go.Figure()
+            fig.add_trace(go.Bar(
+                x=grades_df['Grade'],
+                y=grades_df[subj1],
+                name=subj1))
+            fig.add_trace(go.Bar(
+                x=grades_df['Grade'],
+                y=grades_df[subj2],
+                name=subj2))
+            fig.update_layout(
+                title='Grade Distribution Comparison',
+                xaxis=dict(title='Grade'),
+                yaxis=dict(title='Number of Students'),
+                barmode='group')
+            with st.container(): 
+                st.plotly_chart(fig)
             
-            if row[subj1]>=90:
-                graddict1['O'][subj1]+=1
-            elif row[subj1]>=75 and row[subj1]<90:
-                graddict1['A'][subj1]+=1
-            elif row[subj1]>=60 and row[subj1]<75:
-                graddict1['B'][subj1]+=1
-            elif row[subj1]>=50 and row[subj1]<60:
-                graddict1['C'][subj1]+=1
-            elif row[subj1]>=40 and row[subj1]<50:
-                graddict1['D'][subj1]+=1
-            else:
-                graddict1['F'][subj1]+=1
-            if row[subj2]>=90:
-                graddict2['O'][subj2]+=1
-            elif row[subj2]>=75 and row[subj2]<90:
-                graddict2['A'][subj2]+=1
-            elif row[subj2]>=60 and row[subj2]<75:
-                graddict2['B'][subj2]+=1
-            elif row[subj2]>=50 and row[subj2]<60:
-                graddict2['C'][subj2]+=1
-            elif row[subj2]>=40 and row[subj2]<50:
-                graddict2['D'][subj2]+=1
-            else:
-                graddict2['F'][subj2]+=1
-                
-#grading system charts start here
-        print("graddict1",graddict1)
-        print("graddict2",graddict2)
-        grades_df = pd.DataFrame({
-    'Grade': ['O', 'A', 'B', 'C', 'D', 'F'],
-    subj1: [graddict1[grade][subj1] for grade in ['O', 'A', 'B', 'C', 'D', 'F']],
-    subj2: [graddict2[grade][subj2] for grade in ['O', 'A', 'B', 'C', 'D', 'F']]})
-        fig = go.Figure()
-
-        fig.add_trace(go.Bar(
-            x=grades_df['Grade'],
-            y=grades_df[subj1],
-            name=subj1
-        ))
-
-        fig.add_trace(go.Bar(
-            x=grades_df['Grade'],
-            y=grades_df[subj2],
-            name=subj2
-        ))
-        fig.update_layout(
-            title='Grade Distribution Comparison',
-            xaxis=dict(title='Grade'),
-            yaxis=dict(title='Number of Students'),
-            barmode='group'
-        )
-        
-        st.plotly_chart(fig)
 
         
