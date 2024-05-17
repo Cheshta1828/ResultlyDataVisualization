@@ -33,13 +33,15 @@ if "all_subjects1" not in st.session_state:
     st.session_state.all_subjects1 = []
 if "all_subjects2" not in st.session_state:
     st.session_state.all_subjects2 = []
+if "buttondisabled" not in st.session_state:
+    st.session_state.buttondisabled = False
     
 url = 'https://resultlymsi.pythonanywhere.com/visualize/result/'
 response = requests.get(url)
 checkboxes_dict = {}
 
 with col1:
-    options=[f"{item['course_abbreviation']} - {item['semester']} Passout Year: {item['passout_year']} ({item['id']}) " for item in response.json()]
+    options=[f"{item['course_abbreviation']} - {item['semester']} Passout Year: {item['passout_year']} ({item['id']})" for item in response.json()]
     #options=["hello","world","this","is","a","test","to","check","the","functionality","of","the","app"]
     st.header("Fetch data")
     option = st.selectbox("Selected an already available result:", options)
@@ -65,7 +67,7 @@ with col1:
                     
                 except:
                     continue
-        #print(checkboxes_dict)
+    
         
     with col2a:
         st.write("")
@@ -96,11 +98,17 @@ style = "<style>.row-widget.stButton {text-align: center;}</style>"
 st.markdown(style, unsafe_allow_html=True)
 error=False
 with st.empty():
-    if st.button("Fetch Subjects"):
+    btn=st.button("Fetch Subjects")
+    if btn and not st.session_state.buttondisabled:
+       
         
+        st.session_state.buttondisabled=True
+        
+        
+        
+        
+      
         error=False
-        
-        #print("--------checkboxdict",checkboxes_dict)
         for item in  checkboxes_dict:
                 # st.session_state.checked_items.append(item)
                 if len([s for s in checkboxes_dict.keys() if checkboxes_dict[s]])>2:
@@ -117,29 +125,34 @@ with st.empty():
             for item in checkboxes_dict.keys():
                 if ".csv" in item:
                     print("in")
+                    print("---item---",item)
                     df=pd.read_csv(st.session_state.uploaded[item])
+                    print("--df of uoloaded--",df)
                     print("inss")
                     st.session_state.list_of_files.append(df)
                     
-                else:
+                else: #fetched data
+                    print("in fetched")
                     listofstring=item.split(" ")
+                    print("--listofstring----",listofstring)
                     id=listofstring[-1][1:-1]
-                    response = requests.get(f'https://resultlymsi.pythonanywhere.com/visualize/result/{id}')
-                    for item in response.json():
-                        df_file=pd.read_json(item['result_json'])
-                        st.session_state.list_of_files.append(df_file)
+                    print("--id---",id)
+                    item = requests.get(f'https://resultlymsi.pythonanywhere.com/visualize/result/{id}').json()
+                    print("item",item)
+                    df_file=pd.read_json(item['result_json'])
+                    st.session_state.list_of_files.append(df_file)
               
-            st.session_state.columnsoffetched=st.session_state.list_of_files[1].columns[4:]
+            st.session_state.columnsoffetched=st.session_state.list_of_files[0].columns[4:]
             st.session_state.columnsoffetched=st.session_state.columnsoffetched[:-4]
-            st.session_state.columnsofuploaded =st.session_state.list_of_files[0].columns[4:]
+            st.session_state.columnsofuploaded =st.session_state.list_of_files[1].columns[4:]
             st.session_state.columnsofuploaded = st.session_state.columnsofuploaded [:-4]
             st.session_state.columnsoffetched=[c for c  in st.session_state.columnsoffetched if 'External' not in c and 'Internal' not in c and 'Total' not in c]
             st.session_state.columnsofuploaded =[c for c in  st.session_state.columnsofuploaded  if 'External' not in c and 'Internal' not in c and 'Total' not in c and '.1' not in c and '.2' not in c]
-            print("colummmmmmm",st.session_state.columnsoffetched)    
-print("enddd",st.session_state.list_of_files)                    
+                   
                     
                     
-                    
+    elif st.session_state.buttondisabled and btn:
+        st.error("Please Refresh")             
                  
                     
                                  
@@ -160,9 +173,7 @@ with col1b:
             list_duplicate = st.session_state.selected_subject
             st.session_state.selected_subject.append(option1)
             list_updated=1
-            print("list_updated",list_updated)
-            print("list_duplicate",list_duplicate)
-            print(st.session_state.selected_subject)
+           
             st.session_state.s=""
             for item in st.session_state.selected_subject:
                 
@@ -173,7 +184,7 @@ with col1b:
             list_updated=0
             
             placeholder.text(st.session_state.s)
-            print("list_updatedafter",list_updated)
+        
             
 with col2b:
     st.markdown("<h4 style=' color: white;'>Uploaded Data</h4>", unsafe_allow_html=True)
@@ -203,10 +214,10 @@ with col2b:
             list_updated=0
             
             placeholder2.text(st.session_state.str2)
-            print("list_updatedafter",list_updated)
             
-            
-
+                       
+reappeardict1={}
+reappeardict2={}
 style = "<style>.row-widget.stButton {text-align: center;}</style>"
 st.markdown(style, unsafe_allow_html=True)
 
@@ -215,12 +226,13 @@ if st.button("Compare Now!"):
             st.error("Please select 2 subjects to compare")
         else:
             
-            print("hii")
+           
 
             dfofone={}
             dfoftwo={}
+        
             for subj1 in st.session_state.all_subjects1:
-                print("the data from df is ",st.session_state.list_of_files[1])
+                
                 #fetch index of subj1
                 index=st.session_state.list_of_files[1].columns.get_loc(subj1)
                 
@@ -230,20 +242,24 @@ if st.button("Compare Now!"):
                 index2=st.session_state.list_of_files[0].columns.get_loc(subj2)
                 dfoftwo[subj2]=list(st.session_state.list_of_files[0].iloc[:,index2+2][1:])
 
-            print("dfofone",dfofone)
-            print("dfoftwo",dfoftwo)
+           
             dfofone=pd.DataFrame(dfofone)
             dfoftwo=pd.DataFrame(dfoftwo)
             #plotting each subject against the other 
             no_of_graphs=dfofone.shape[1]
-            print("no_of_graphs",no_of_graphs)
+           
             for i in range(no_of_graphs):
                 subj1 = dfofone.columns[i]
                 subj2 = dfoftwo.columns[i]
+                reappeardict1[subj1]=0
+                reappeardict2[subj2]=0
                 print("subj1", subj1)
                 print("subj2", subj2)
                 y1 = pd.to_numeric(dfofone.iloc[:, i],errors="coerce").sort_values(ascending=True).reset_index(drop=True)
                 y2 = pd.to_numeric(dfoftwo.iloc[:, i],errors="coerce").sort_values(ascending=True).reset_index(drop=True)
+                
+                
+                           
                 print("y1", y1)
                 print("y2", y2)
                 x = list(range(1, max(len(y1), len(y2)) + 1))
@@ -253,16 +269,32 @@ if st.button("Compare Now!"):
                 y1 = y1.reindex(range(len(x)))
                 y2 = y2.reindex(range(len(x)))
                 df=pd.DataFrame({"students":x,subj1:y1,subj2:y2})
+                #iterate over df and update the reappeae subj
+                for index, row in df.iterrows():
+                    
+                    if row[subj1]<40 and row[subj2]>=40:
+                        reappeardict1[subj1]+=1
+                    if row[subj1]>=0 and row[subj2]<40:
+                        reappeardict2[subj2]+=1
                 print("df",df)
                 df_melted=pd.melt(df,id_vars="students",value_vars=[subj1,subj2],var_name="subjects",value_name="marks")
                 print("df_melted",df_melted)
                 fig=px.line(df_melted,x="students",y="marks",color="subjects",title=f"Comparison of {dfofone.columns[i]} and {dfoftwo.columns[i]}")
                 
-
-            # Display the figure using streamlit
+    
+            
                 with st.container():
                     st.plotly_chart(fig)
                     print("plotted")
+
+                    
+col1d , col2d = st.columns(2)
+print("reappeardict1",reappeardict1)
+print("reappeardict2",reappeardict2)
+# with col1d:
+#     st.metric(label="Data 1 Reappear", value=dat1reappcount)
+# with col2d:
+#     st.metric(label="Data 2 Reappear", value=dat2reappcount)
                     
                     
                     
