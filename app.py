@@ -228,7 +228,7 @@ if st.button("Compare Now!"):
             st.error("Please select 2 subjects to compare")
         else:
             
-           
+            st.markdown("<h2 style=' color: white;'>Comparison of the total marks of all the subjects</h2>", unsafe_allow_html=True)
 
             dfofone={}
             dfoftwo={}
@@ -289,7 +289,7 @@ if st.button("Compare Now!"):
                     st.plotly_chart(fig)
                     print("plotted")
 
-                    
+        st.markdown("<h2 style=' color: white;'>Number of reapper in all subjects</h2>", unsafe_allow_html=True)      
         col1d , col2d = st.columns(2)
         print("reappeardict1",reappeardict1)
         print("reappeardict2",reappeardict2)
@@ -306,90 +306,47 @@ if st.button("Compare Now!"):
                     
         #-------------------------Stacked grouped bar chart starts here
 
-
-        #this is an update
+        st.markdown("<h2 style=' color: white;'>Internal - External marks comparision of all the subjects</h2>", unsafe_allow_html=True) 
         
         selected_subjects1 = st.session_state.all_subjects1
         selected_subjects2 = st.session_state.all_subjects2
-        index = [f"{selected_subjects1[i]} and {selected_subjects2[i]}" for i in range(len(selected_subjects1))]
+        selected_subeject = selected_subjects1 + selected_subjects2
+        values1 = []
+        values2 = []
+        if selected_subjects1[0] in st.session_state.list_of_files[0].columns:
+            d1 = st.session_state.list_of_files[0]
+            d2 = st.session_state.list_of_files[1]
+        else:
+            d1 = st.session_state.list_of_files[1]
+            d2 = st.session_state.list_of_files[0]
+        indexs1 = [d1.columns.get_loc(subj) for subj in selected_subjects1]
+        indexs2 = [d2.columns.get_loc(subj) for subj in selected_subjects2]
+        #get mean of indexes 
+        for index in indexs1:
+            values1.append(d1.iloc[1:,index].astype(float).mean())
+            values1.append(d2.iloc[1:,index].astype(float).mean())
+        for index in indexs2:
+            values2.append(d1.iloc[1:,index+1].astype(float).mean())
+            values2.append(d2.iloc[1:,index+1].astype(float).mean())
+        # Create the figure
+        fig = go.Figure()
 
-        print("selected_subjects",index)
-        df = pd.concat(
-            [
-                pd.DataFrame(
-                    np.random.rand(2, 2) * 1.25 + 0.25,
-                    index=index,
-                    columns=["Internal", "External"]
-                ),
-                pd.DataFrame(
-                    np.random.rand(2, 2) + 0.5,
-                    index=index,
-                    columns=["Internal", "External"]
-                ),
-            ],
-            axis=1,
-            keys=["Subject 1", "Subject 2"]
-        )
+        # Add the first set of bars
+        fig.add_trace(go.Bar(
+            x=selected_subeject,
+            y=values1,
+            name='Internal'
+        ))
 
-        # Create a figure with the right layout
-        fig = go.Figure(
-            layout=go.Layout(
-                height=600,
-                width=1000,
-                barmode="relative",
-                yaxis_showticklabels=False,
-                yaxis_showgrid=False,
-                yaxis_range=[0, df.groupby(axis=1, level=0).sum().max().max() * 1.5],
-            # Secondary y-axis overlayed on the primary one and not visible
-                yaxis2=go.layout.YAxis(
-                    visible=False,
-                    matches="y",
-                    overlaying="y",
-                    anchor="x",
-                ),
-                font=dict(size=24),
-                legend_x=0,
-                legend_y=1,
-                legend_orientation="h",
-                hovermode="x",
-                margin=dict(b=0, t=10, l=0, r=10)
-            )
-        )
+        # Add the second set of bars on top of the first
+        fig.add_trace(go.Bar(
+            x=selected_subeject,
+            y=values2,
+            name='External'
+        ))
 
-        # Define some colors for the product, revenue pairs
-        colors = {
-            "Subject 1": {
-                "Internal": "#F28F1D",
-                "External": "#F6C619",
-            },
-            "Subject 2": {
-                "Internal": "#2B6045",
-                "External": "#5EB88A",
-            }
-        }
-
-        # Add the traces
-        for i, t in enumerate(colors):
-            for j, col in enumerate(df[t].columns):
-                if (df[t][col] == 0).all():
-                    continue
-                fig.add_bar(
-                    x=df.index,
-                    y=df[t][col],
-                    # Set the right yaxis depending on the selected product (from enumerate)
-                    yaxis=f"y{i + 1}",
-                    # Offset the bar trace, offset needs to match the width
-                    # For categorical traces, each category is spaced by 1
-                    offsetgroup=str(i),
-                    offset=(i - 1) * 1/3,
-                    width=1/3,
-                    legendgroup=t,
-                    legendgrouptitle_text=t,
-                    name=col,
-                    marker_color=colors[t][col],
-                    marker_line=dict(width=2, color="#333"),
-                    hovertemplate="%{y}<extra></extra>"
-                )
+        # Update layout for stacked bar chart
+        fig.update_layout(barmode='stack')
 
         # Display the plot in Streamlit
         st.plotly_chart(fig)
