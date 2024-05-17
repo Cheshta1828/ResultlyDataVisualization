@@ -236,13 +236,13 @@ if st.button("Compare Now!"):
             for subj1 in st.session_state.all_subjects1:
                 
                 #fetch index of subj1
-                index=st.session_state.list_of_files[1].columns.get_loc(subj1)
+                index=st.session_state.list_of_files[0].columns.get_loc(subj1)
                 
-                dfofone[subj1]=list(st.session_state.list_of_files[1].iloc[:,index+2][1:])
+                dfofone[subj1]=list(st.session_state.list_of_files[0].iloc[:,index+2][1:])
 
             for subj2 in st.session_state.all_subjects2:
-                index2=st.session_state.list_of_files[0].columns.get_loc(subj2)
-                dfoftwo[subj2]=list(st.session_state.list_of_files[0].iloc[:,index2+2][1:])
+                index2=st.session_state.list_of_files[1].columns.get_loc(subj2)
+                dfoftwo[subj2]=list(st.session_state.list_of_files[1].iloc[:,index2+2][1:])
 
            
             dfofone=pd.DataFrame(dfofone)
@@ -290,107 +290,111 @@ if st.button("Compare Now!"):
                     print("plotted")
 
                     
-# col1d , col2d = st.columns(2)
-# print("reappeardict1",reappeardict1)
-# print("reappeardict2",reappeardict2)
-# with col1d:
-#     st.metric(label="Data 1 Reappear", value=dat1reappcount)
-# with col2d:
-#     st.metric(label="Data 2 Reappear", value=dat2reappcount)
+        col1d , col2d = st.columns(2)
+        print("reappeardict1",reappeardict1)
+        print("reappeardict2",reappeardict2)
+
+        with col1d:
+            for key in reappeardict1.keys():
+                st.metric(label=f"{key} Reappear", value=reappeardict1[key])
+        with col2d:
+            for key in reappeardict2.keys():
+                st.metric(label=f"{key} Reappear", value=reappeardict2[key])
+
                     
                     
                     
-            #-------------------------Stacked grouped bar chart starts here
+        #-------------------------Stacked grouped bar chart starts here
 
 
-            # Create dummy data indexed by state and with multi-columns [product, revenue]
-            # index = ["California", "Texas", "Arizona", "Nevada", "Louisiana"]
-            selected_subjects1 = st.session_state.all_subjects1
-            selected_subjects2 = st.session_state.all_subjects2
-            index = [f"{selected_subjects1[i]} and {selected_subjects2[i]}" for i in range(len(selected_subjects1))]
+        # Create dummy data indexed by state and with multi-columns [product, revenue]
+        # index = ["California", "Texas", "Arizona", "Nevada", "Louisiana"]
+        selected_subjects1 = st.session_state.all_subjects1
+        selected_subjects2 = st.session_state.all_subjects2
+        index = [f"{selected_subjects1[i]} and {selected_subjects2[i]}" for i in range(len(selected_subjects1))]
 
-            print("selected_subjects",index)
-            df = pd.concat(
-                [
-                    pd.DataFrame(
-                        np.random.rand(2, 2) * 1.25 + 0.25,
-                        index=index,
-                        columns=["Internal", "External"]
-                    ),
-                    pd.DataFrame(
-                        np.random.rand(2, 2) + 0.5,
-                        index=index,
-                        columns=["Internal", "External"]
-                    ),
-                ],
-                axis=1,
-                keys=["Subject 1", "Subject 2"]
+        print("selected_subjects",index)
+        df = pd.concat(
+            [
+                pd.DataFrame(
+                    np.random.rand(2, 2) * 1.25 + 0.25,
+                    index=index,
+                    columns=["Internal", "External"]
+                ),
+                pd.DataFrame(
+                    np.random.rand(2, 2) + 0.5,
+                    index=index,
+                    columns=["Internal", "External"]
+                ),
+            ],
+            axis=1,
+            keys=["Subject 1", "Subject 2"]
+        )
+
+        # Create a figure with the right layout
+        fig = go.Figure(
+            layout=go.Layout(
+                height=600,
+                width=1000,
+                barmode="relative",
+                yaxis_showticklabels=False,
+                yaxis_showgrid=False,
+                yaxis_range=[0, df.groupby(axis=1, level=0).sum().max().max() * 1.5],
+            # Secondary y-axis overlayed on the primary one and not visible
+                yaxis2=go.layout.YAxis(
+                    visible=False,
+                    matches="y",
+                    overlaying="y",
+                    anchor="x",
+                ),
+                font=dict(size=24),
+                legend_x=0,
+                legend_y=1,
+                legend_orientation="h",
+                hovermode="x",
+                margin=dict(b=0, t=10, l=0, r=10)
             )
+        )
 
-            # Create a figure with the right layout
-            fig = go.Figure(
-                layout=go.Layout(
-                    height=600,
-                    width=1000,
-                    barmode="relative",
-                    yaxis_showticklabels=False,
-                    yaxis_showgrid=False,
-                    yaxis_range=[0, df.groupby(axis=1, level=0).sum().max().max() * 1.5],
-                # Secondary y-axis overlayed on the primary one and not visible
-                    yaxis2=go.layout.YAxis(
-                        visible=False,
-                        matches="y",
-                        overlaying="y",
-                        anchor="x",
-                    ),
-                    font=dict(size=24),
-                    legend_x=0,
-                    legend_y=1,
-                    legend_orientation="h",
-                    hovermode="x",
-                    margin=dict(b=0, t=10, l=0, r=10)
-                )
-            )
-
-            # Define some colors for the product, revenue pairs
-            colors = {
-                "Subject 1": {
-                    "Internal": "#F28F1D",
-                    "External": "#F6C619",
-                },
-                "Subject 2": {
-                    "Internal": "#2B6045",
-                    "External": "#5EB88A",
-                }
+        # Define some colors for the product, revenue pairs
+        colors = {
+            "Subject 1": {
+                "Internal": "#F28F1D",
+                "External": "#F6C619",
+            },
+            "Subject 2": {
+                "Internal": "#2B6045",
+                "External": "#5EB88A",
             }
+        }
 
-            # Add the traces
-            for i, t in enumerate(colors):
-                for j, col in enumerate(df[t].columns):
-                    if (df[t][col] == 0).all():
-                        continue
-                    fig.add_bar(
-                        x=df.index,
-                        y=df[t][col],
-                        # Set the right yaxis depending on the selected product (from enumerate)
-                        yaxis=f"y{i + 1}",
-                        # Offset the bar trace, offset needs to match the width
-                        # For categorical traces, each category is spaced by 1
-                        offsetgroup=str(i),
-                        offset=(i - 1) * 1/3,
-                        width=1/3,
-                        legendgroup=t,
-                        legendgrouptitle_text=t,
-                        name=col,
-                        marker_color=colors[t][col],
-                        marker_line=dict(width=2, color="#333"),
-                        hovertemplate="%{y}<extra></extra>"
-                    )
+        # Add the traces
+        for i, t in enumerate(colors):
+            for j, col in enumerate(df[t].columns):
+                if (df[t][col] == 0).all():
+                    continue
+                fig.add_bar(
+                    x=df.index,
+                    y=df[t][col],
+                    # Set the right yaxis depending on the selected product (from enumerate)
+                    yaxis=f"y{i + 1}",
+                    # Offset the bar trace, offset needs to match the width
+                    # For categorical traces, each category is spaced by 1
+                    offsetgroup=str(i),
+                    offset=(i - 1) * 1/3,
+                    width=1/3,
+                    legendgroup=t,
+                    legendgrouptitle_text=t,
+                    name=col,
+                    marker_color=colors[t][col],
+                    marker_line=dict(width=2, color="#333"),
+                    hovertemplate="%{y}<extra></extra>"
+                )
 
-            # Display the plot in Streamlit
-            st.plotly_chart(fig)
+        # Display the plot in Streamlit
+        st.plotly_chart(fig)
 
-            #------------------------------------stacked grouped bar chart ends here                    
+        #------------------------------------stacked grouped bar chart ends here                    
                     
                     
                     
