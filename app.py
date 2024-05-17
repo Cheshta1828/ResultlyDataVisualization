@@ -3,9 +3,12 @@ import requests
 import json
 import pandas as pd
 import numpy as np
-# import plotly.figure_factory as fF
+import plotly.figure_factory as ff
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.figure_factory as ff
+#import scipy
+import scipy
 
 
 st.set_page_config(page_title=None, page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items=None)
@@ -271,6 +274,7 @@ if st.button("Compare Now!"):
                 y1 = y1.reindex(range(len(x)))
                 y2 = y2.reindex(range(len(x)))
                 df=pd.DataFrame({"students":x,subj1:y1,subj2:y2})
+                copy_of_df=df.copy()   
                 #iterate over df and update the reappeae subj
                 for index, row in df.iterrows():
                     
@@ -309,97 +313,193 @@ if st.button("Compare Now!"):
 
         #this is an update
         
-        selected_subjects1 = st.session_state.all_subjects1
-        selected_subjects2 = st.session_state.all_subjects2
-        index = [f"{selected_subjects1[i]} and {selected_subjects2[i]}" for i in range(len(selected_subjects1))]
+        # selected_subjects1 = st.session_state.all_subjects1
+        # selected_subjects2 = st.session_state.all_subjects2
+        # index = [f"{selected_subjects1[i]} and {selected_subjects2[i]}" for i in range(len(selected_subjects1))]
 
-        print("selected_subjects",index)
-        df = pd.concat(
-            [
-                pd.DataFrame(
-                    np.random.rand(2, 2) * 1.25 + 0.25,
-                    index=index,
-                    columns=["Internal", "External"]
-                ),
-                pd.DataFrame(
-                    np.random.rand(2, 2) + 0.5,
-                    index=index,
-                    columns=["Internal", "External"]
-                ),
-            ],
-            axis=1,
-            keys=["Subject 1", "Subject 2"]
-        )
+        # print("selected_subjects",index)
+        # df = pd.concat(
+        #     [
+        #         pd.DataFrame(
+        #             np.random.rand(2, 2) * 1.25 + 0.25,
+        #             index=index,
+        #             columns=["Internal", "External"]
+        #         ),
+        #         pd.DataFrame(
+        #             np.random.rand(2, 2) + 0.5,
+        #             index=index,
+        #             columns=["Internal", "External"]
+        #         ),
+        #     ],
+        #     axis=1,
+        #     keys=["Subject 1", "Subject 2"]
+        # )
 
-        # Create a figure with the right layout
-        fig = go.Figure(
-            layout=go.Layout(
-                height=600,
-                width=1000,
-                barmode="relative",
-                yaxis_showticklabels=False,
-                yaxis_showgrid=False,
-                yaxis_range=[0, df.groupby(axis=1, level=0).sum().max().max() * 1.5],
-            # Secondary y-axis overlayed on the primary one and not visible
-                yaxis2=go.layout.YAxis(
-                    visible=False,
-                    matches="y",
-                    overlaying="y",
-                    anchor="x",
-                ),
-                font=dict(size=24),
-                legend_x=0,
-                legend_y=1,
-                legend_orientation="h",
-                hovermode="x",
-                margin=dict(b=0, t=10, l=0, r=10)
-            )
-        )
+        # # Create a figure with the right layout
+        # fig = go.Figure(
+        #     layout=go.Layout(
+        #         height=600,
+        #         width=1000,
+        #         barmode="relative",
+        #         yaxis_showticklabels=False,
+        #         yaxis_showgrid=False,
+        #         yaxis_range=[0, df.groupby(axis=1, level=0).sum().max().max() * 1.5],
+        #     # Secondary y-axis overlayed on the primary one and not visible
+        #         yaxis2=go.layout.YAxis(
+        #             visible=False,
+        #             matches="y",
+        #             overlaying="y",
+        #             anchor="x",
+        #         ),
+        #         font=dict(size=24),
+        #         legend_x=0,
+        #         legend_y=1,
+        #         legend_orientation="h",
+        #         hovermode="x",
+        #         margin=dict(b=0, t=10, l=0, r=10)
+        #     )
+        # )
 
-        # Define some colors for the product, revenue pairs
-        colors = {
-            "Subject 1": {
-                "Internal": "#F28F1D",
-                "External": "#F6C619",
-            },
-            "Subject 2": {
-                "Internal": "#2B6045",
-                "External": "#5EB88A",
-            }
-        }
+        # # Define some colors for the product, revenue pairs
+        # colors = {
+        #     "Subject 1": {
+        #         "Internal": "#F28F1D",
+        #         "External": "#F6C619",
+        #     },
+        #     "Subject 2": {
+        #         "Internal": "#2B6045",
+        #         "External": "#5EB88A",
+        #     }
+        # }
 
-        # Add the traces
-        for i, t in enumerate(colors):
-            for j, col in enumerate(df[t].columns):
-                if (df[t][col] == 0).all():
-                    continue
-                fig.add_bar(
-                    x=df.index,
-                    y=df[t][col],
-                    # Set the right yaxis depending on the selected product (from enumerate)
-                    yaxis=f"y{i + 1}",
-                    # Offset the bar trace, offset needs to match the width
-                    # For categorical traces, each category is spaced by 1
-                    offsetgroup=str(i),
-                    offset=(i - 1) * 1/3,
-                    width=1/3,
-                    legendgroup=t,
-                    legendgrouptitle_text=t,
-                    name=col,
-                    marker_color=colors[t][col],
-                    marker_line=dict(width=2, color="#333"),
-                    hovertemplate="%{y}<extra></extra>"
-                )
+        # # Add the traces
+        # for i, t in enumerate(colors):
+        #     for j, col in enumerate(df[t].columns):
+        #         if (df[t][col] == 0).all():
+        #             continue
+        #         fig.add_bar(
+        #             x=df.index,
+        #             y=df[t][col],
+        #             # Set the right yaxis depending on the selected product (from enumerate)
+        #             yaxis=f"y{i + 1}",
+        #             # Offset the bar trace, offset needs to match the width
+        #             # For categorical traces, each category is spaced by 1
+        #             offsetgroup=str(i),
+        #             offset=(i - 1) * 1/3,
+        #             width=1/3,
+        #             legendgroup=t,
+        #             legendgrouptitle_text=t,
+        #             name=col,
+        #             marker_color=colors[t][col],
+        #             marker_line=dict(width=2, color="#333"),
+        #             hovertemplate="%{y}<extra></extra>"
+        #         )
 
-        # Display the plot in Streamlit
-        st.plotly_chart(fig)
+        # # Display the plot in Streamlit
+        # st.plotly_chart(fig)
 
         #------------------------------------stacked grouped bar chart ends here                    
                     
                     
                     
 
+
+
+        print("starting histo")
+        graddict1={
+                    'O':{},
+                    'A':{},
+                    'B':{},
+                    'C':{},
+                    'D':{},
+                    'F':{}}
+        graddict2={
+                    'O':{},
+                    'A':{},
+                    'B':{},
+                    'C':{},
+                    'D':{},
+                    'F':{}}
+        graddict1['O'][subj1]=0
+        graddict1['A'][subj1]=0
+        graddict1['B'][subj1]=0
+        graddict1['C'][subj1]=0
+        graddict1['D'][subj1]=0
+        graddict1['F'][subj1]=0
+        graddict2['O'][subj2]=0
+        graddict2['A'][subj2]=0
+        graddict2['B'][subj2]=0
+        graddict2['C'][subj2]=0
+        graddict2['D'][subj2]=0
+        graddict2['F'][subj2]=0
+        
+        print("anbdr wala df",copy_of_df)
+        for index, row in copy_of_df.iterrows():
+            print("---row"  ,row[subj1])
+            
+            if row[subj1]>90:
+                graddict1['O'][subj1]+=1
+            elif row[subj1]>80:
+                graddict1['A'][subj1]+=1
+            elif row[subj1]>70:
+                graddict1['B'][subj1]+=1
+            elif row[subj1]>60:
+                graddict1['C'][subj1]+=1
+            elif row[subj1]>50:
+                graddict1['D'][subj1]+=1
+            else:
+                graddict1['F'][subj1]+=1
+            if row[subj2]>90:
+                graddict2['O'][subj2]+=1
+            elif row[subj2]>80:
+                graddict2['A'][subj2]+=1
+            elif row[subj2]>70:
+                graddict2['B'][subj2]+=1
+            elif row[subj2]>60:
+                graddict2['C'][subj2]+=1
+            elif row[subj2]>50:
+                graddict2['D'][subj2]+=1
+            else:
+                graddict2['F'][subj2]+=1
                 
+#grading system charts start here
+        print("graddict1",graddict1)
+        print("graddict2",graddict2)
+        grades_df = pd.DataFrame({
+    'Grade': ['O', 'A', 'B', 'C', 'D', 'F'],
+    subj1: [graddict1[grade][subj1] for grade in ['O', 'A', 'B', 'C', 'D', 'F']],
+    subj2: [graddict2[grade][subj2] for grade in ['O', 'A', 'B', 'C', 'D', 'F']]})
+        fig = go.Figure()
+
+        fig.add_trace(go.Bar(
+            x=grades_df['Grade'],
+            y=grades_df[subj1],
+            name=subj1
+        ))
+
+        fig.add_trace(go.Bar(
+            x=grades_df['Grade'],
+            y=grades_df[subj2],
+            name=subj2
+        ))
+
+        # Update layout for better readability
+        fig.update_layout(
+            title='Grade Distribution Comparison',
+            xaxis=dict(title='Grade'),
+            yaxis=dict(title='Number of Students'),
+            barmode='group'
+        )
+
+        # Display the chart in Streamlit
+        st.plotly_chart(fig)
+    #grading system charts end here 
+                
+
+
+
+
+            
     
 
     
