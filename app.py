@@ -231,7 +231,7 @@ if st.button("Compare Now!"):
             st.error("Please select 2 subjects to compare")
         else:
             
-           
+            st.markdown("<h2 style=' color: white;'>Comparison of the total marks of all the subjects</h2>", unsafe_allow_html=True)
 
             dfofone={}
             dfoftwo={}
@@ -293,7 +293,7 @@ if st.button("Compare Now!"):
                     st.plotly_chart(fig)
                     print("plotted")
 
-                    
+        st.markdown("<h2 style=' color: white;'>Number of reapper in all subjects</h2>", unsafe_allow_html=True)      
         col1d , col2d = st.columns(2)
         print("reappeardict1",reappeardict1)
         print("reappeardict2",reappeardict2)
@@ -308,8 +308,48 @@ if st.button("Compare Now!"):
                     
                     
                     
-                           
-                    
+        #-------------------------Stacked grouped bar chart starts here
+
+        st.markdown("<h2 style=' color: white;'>Internal - External marks comparision of all the subjects</h2>", unsafe_allow_html=True) 
+        selected_subjects1 = st.session_state.all_subjects1
+        selected_subjects2 = st.session_state.all_subjects2
+        selected_subeject = selected_subjects1 + selected_subjects2
+        values1 = []
+        values2 = []
+        if selected_subjects1[0] in st.session_state.list_of_files[0].columns:
+            d1 = st.session_state.list_of_files[0]
+            d2 = st.session_state.list_of_files[1]
+        else:
+            d1 = st.session_state.list_of_files[1]
+            d2 = st.session_state.list_of_files[0]
+        indexs1 = [d1.columns.get_loc(subj) for subj in selected_subjects1]
+        indexs2 = [d2.columns.get_loc(subj) for subj in selected_subjects2]
+        #get mean of indexes 
+        for index in indexs1:
+            values1.append(d1.iloc[1:,index].astype(float).mean())
+            values1.append(d2.iloc[1:,index].astype(float).mean())
+        for index in indexs2:
+            values2.append(d1.iloc[1:,index+1].astype(float).mean())
+            values2.append(d2.iloc[1:,index+1].astype(float).mean())
+        # Create the figure
+        fig = go.Figure()
+
+        # Add the first set of bars
+        fig.add_trace(go.Bar(
+            x=selected_subeject,
+            y=values1,
+            name='Internal'
+        ))
+
+        # Add the second set of bars on top of the first
+        fig.add_trace(go.Bar(
+            x=selected_subeject,
+            y=values2,
+            name='External'
+        )) 
+        fig.update_layout(barmode='stack')
+        st.plotly_chart(fig)                
+                   
                     
                     
 
@@ -343,31 +383,31 @@ if st.button("Compare Now!"):
         graddict2['D'][subj2]=0
         graddict2['F'][subj2]=0
         
+        
         print("anbdr wala df",copy_of_df)
         for index, row in copy_of_df.iterrows():
-            print("---row"  ,row[subj1])
             
-            if row[subj1]>90:
+            if row[subj1]>=90:
                 graddict1['O'][subj1]+=1
-            elif row[subj1]>80:
+            elif row[subj1]>=75 and row[subj1]<90:
                 graddict1['A'][subj1]+=1
-            elif row[subj1]>70:
+            elif row[subj1]>=60 and row[subj1]<75:
                 graddict1['B'][subj1]+=1
-            elif row[subj1]>60:
+            elif row[subj1]>=50 and row[subj1]<60:
                 graddict1['C'][subj1]+=1
-            elif row[subj1]>50:
+            elif row[subj1]>=40 and row[subj1]<50:
                 graddict1['D'][subj1]+=1
             else:
                 graddict1['F'][subj1]+=1
-            if row[subj2]>90:
+            if row[subj2]>=90:
                 graddict2['O'][subj2]+=1
-            elif row[subj2]>80:
+            elif row[subj2]>=75 and row[subj2]<90:
                 graddict2['A'][subj2]+=1
-            elif row[subj2]>70:
+            elif row[subj2]>=60 and row[subj2]<75:
                 graddict2['B'][subj2]+=1
-            elif row[subj2]>60:
+            elif row[subj2]>=50 and row[subj2]<60:
                 graddict2['C'][subj2]+=1
-            elif row[subj2]>50:
+            elif row[subj2]>=40 and row[subj2]<50:
                 graddict2['D'][subj2]+=1
             else:
                 graddict2['F'][subj2]+=1
@@ -400,16 +440,7 @@ if st.button("Compare Now!"):
             yaxis=dict(title='Number of Students'),
             barmode='group'
         )
-
-        # Display the chart in Streamlit
+        
         st.plotly_chart(fig)
-    #grading system charts end here 
-                
 
-
-
-
-            
-    
-
-    
+        
