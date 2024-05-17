@@ -307,6 +307,7 @@ if st.button("Compare Now!"):
         #-------------------------Stacked grouped bar chart starts here
 
 
+        #this is an update
         
         selected_subjects1 = st.session_state.all_subjects1
         selected_subjects2 = st.session_state.all_subjects2
