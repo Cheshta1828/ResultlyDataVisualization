@@ -288,13 +288,17 @@ if st.button("Compare Now!"):
                     print("plotted")
 
                     
-col1d , col2d = st.columns(2)
-print("reappeardict1",reappeardict1)
-print("reappeardict2",reappeardict2)
-# with col1d:
-#     st.metric(label="Data 1 Reappear", value=dat1reappcount)
-# with col2d:
-#     st.metric(label="Data 2 Reappear", value=dat2reappcount)
+        col1d , col2d = st.columns(2)
+        print("reappeardict1",reappeardict1)
+        print("reappeardict2",reappeardict2)
+
+        with col1d:
+            for key in reappeardict1.keys():
+                st.metric(label=f"{key} Reappear", value=reappeardict1[key])
+        with col2d:
+            for key in reappeardict2.keys():
+                st.metric(label=f"{key} Reappear", value=reappeardict2[key])
+
                     
                     
                     
