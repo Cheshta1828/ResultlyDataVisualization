@@ -231,7 +231,7 @@ if st.button("Compare Now!"):
             st.error("Please select 2 subjects to compare")
         else:
             
-            st.markdown("<h2 style=' color: white;'>Comparison of the total marks of all the subjects</h2>", unsafe_allow_html=True)
+            #st.markdown("<h2 style=' color: white;'>Comparison of the total marks of all the subjects</h2>", unsafe_allow_html=True)
 
             dfofone={}
             dfoftwo={}
@@ -290,10 +290,10 @@ if st.button("Compare Now!"):
     
             
                 with st.container():
-                    st.plotly_chart(fig)
+                    st.plotly_chart(fig,title=f"Comparison of {dfofone.columns[i]} and {dfoftwo.columns[i]}")
                     print("plotted")
 
-        st.markdown("<h2 style=' color: white;'>Number of reapper in all subjects</h2>", unsafe_allow_html=True)      
+        st.markdown("<h5 style=' color: white;'>Number of reapper in all subjects</h2>", unsafe_allow_html=True)      
         col1d , col2d = st.columns(2)
         print("reappeardict1",reappeardict1)
         print("reappeardict2",reappeardict2)
@@ -310,7 +310,7 @@ if st.button("Compare Now!"):
                     
         #-------------------------Stacked grouped bar chart starts here
 
-        st.markdown("<h2 style=' color: white;'>Internal - External marks comparision of all the subjects</h2>", unsafe_allow_html=True) 
+        #st.markdown("<h2 style=' color: white;'>Internal - External marks comparision of all the subjects</h2>", unsafe_allow_html=True) 
         selected_subjects1 = st.session_state.all_subjects1
         selected_subjects2 = st.session_state.all_subjects2
         selected_subeject = selected_subjects1 + selected_subjects2
@@ -347,7 +347,7 @@ if st.button("Compare Now!"):
             y=values2,
             name='External'
         )) 
-        fig.update_layout(barmode='stack')
+        fig.update_layout(barmode='stack', title='Internal - External marks comparison of all the subjects')
         st.plotly_chart(fig)                
                    
                     
@@ -432,8 +432,6 @@ if st.button("Compare Now!"):
             y=grades_df[subj2],
             name=subj2
         ))
-
-        # Update layout for better readability
         fig.update_layout(
             title='Grade Distribution Comparison',
             xaxis=dict(title='Grade'),
