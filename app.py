@@ -290,9 +290,9 @@ if st.button("Compare Now!"):
                     print("plotted")
 
                     
-col1d , col2d = st.columns(2)
-print("reappeardict1",reappeardict1)
-print("reappeardict2",reappeardict2)
+# col1d , col2d = st.columns(2)
+# print("reappeardict1",reappeardict1)
+# print("reappeardict2",reappeardict2)
 # with col1d:
 #     st.metric(label="Data 1 Reappear", value=dat1reappcount)
 # with col2d:
