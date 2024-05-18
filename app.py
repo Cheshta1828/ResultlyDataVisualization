@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 import plotly.figure_factory as ff
 import scipy
 st.set_page_config(page_title=None, page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items=None)
-st.markdown("<h1 style='text-align: center; color: white;'>Data Visualization</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: white;'>Compare two results with Visualizations</h1>", unsafe_allow_html=True)
 col1 , col2 , col3 = st.columns(3)
 if "selected" not in st.session_state:
     st.session_state.selected = []
@@ -42,8 +42,8 @@ response = requests.get(url)
 checkboxes_dict = {}
 with col1:
     options=[f"{item['course_abbreviation']} - {item['semester']} Passout Year: {item['passout_year']} ({item['id']})" for item in response.json()]
-    st.header("Fetch data")
-    option = st.selectbox("Selected an already available result:", options)
+    st.header("Fetch an already available result")
+    option = st.selectbox("This option fetches already available results from our database:", options)
     col1a , col2a  = st.columns(2)
     with col1a:
         res=st.text_input(value= option,label="You Selected",key=None)
@@ -55,6 +55,7 @@ with col1:
             st.session_state.selected.append(res)
             for item in st.session_state.selected:
                 try:
+                   
                     checkboxes_dict[item] =st.checkbox(item)
                     
                 except:
@@ -65,8 +66,8 @@ with col1:
 with col2:
     st.write("")
 with col3:
-    st.header("Upload data")
-    uploaded_file=st.file_uploader("Upload custom result to visualize", label_visibility="visible",type=["csv"])
+    st.header("Upload any result to compare")
+    uploaded_file=st.file_uploader("Upload custom result to visualize and compare it with the fetched data", label_visibility="visible",type=["csv"])
     upload_button_clicked=st.button("Upload", type="primary")
     for item in st.session_state.uploaded:
                 checkboxes_dict[item] = st.checkbox(item)
@@ -91,9 +92,11 @@ with st.empty():
         for item in  checkboxes_dict:
                 if len([s for s in checkboxes_dict.keys() if checkboxes_dict[s]])>2:
                     lstst=[s for s in checkboxes_dict.keys() if checkboxes_dict[s]]
-                    st.error("You can only select 2 subjects at a time")
+                    print(lstst)
+                    st.error("You can only compare and select 2 results at a time")
                     error=True
                     checkboxes_dict[item]=False
+               
         if not error:
             for item in checkboxes_dict.keys():
                 if ".csv" in item:
@@ -160,6 +163,8 @@ reappeardict2={}
 style = "<style>.row-widget.stButton {text-align: center;}</style>"
 st.markdown(style, unsafe_allow_html=True)
 if st.button("Compare Now!"):
+        if len(st.session_state.all_subjects1)==0 or len(st.session_state.all_subjects2)==0:
+            st.error("Please add the subjects to compare")
         Lofdf=[]
         if len(st.session_state.all_subjects1)!= len(st.session_state.all_subjects2):
             st.error("Please select 2 subjects to compare")
