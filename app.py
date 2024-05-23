@@ -226,7 +226,7 @@ if st.button("Compare and visualize!"):
                     df=pd.DataFrame({"students":x,subj1:y1,subj2:y2})
                     Lofdf.append(df)
                     for index, row in df.iterrows():
-                        if row[subj1]<40 and row[subj2]>=40:
+                        if row[subj1]<40 and row[subj2]>=0:
                             reappeardict1[subj1]+=1
                         if row[subj1]>=0 and row[subj2]<40:
                             reappeardict2[subj2]+=1
